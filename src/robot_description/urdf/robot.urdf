@@ -1,0 +1,278 @@
+<?xml version="1.0" ?>
+
+<robot name="robot_diff" xmlns:xacro="http://ros.org/wiki/xacro">
+  
+  <!-- Included URDF/XACRO Files -->
+  <xacro:include filename="$(find robot_description)/urdf/wheel.xacro" />
+  <xacro:include filename="$(find robot_description)/urdf/sensor.xacro" />
+
+
+
+  <link name="base_link">
+
+ </link>
+  <!--
+########################################################################################
+Modelagem do chassis "link" "joint" 
+########################################################################################
+-->
+  <link name="chassis">
+    <visual>
+      <origin rpy="0 0 1.571" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://robot_description/meshes/Base.dae"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="0 0 1.571" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://robot_description/meshes/Base.dae"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0 0 1.571" xyz="0 0 0"/>
+      <mass value="0.047"/>
+      <inertia ixx="1.902e-4" ixy="0.00e+0" ixz="0.00e+0" iyy="7.850e-5" iyz="0.00e+0" izz="2.373e-4"/>
+    </inertial>
+  </link>
+  <joint name="base_to_chassis" type="fixed">
+    <parent link="base_link"/>
+    <child link="chassis"/>
+    <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+  </joint>
+  
+<!--
+########################################################################################
+Modelagem das rodas "link" "joint" 
+########################################################################################
+-->
+
+  <xacro:robot_diff_wheel side_wheel="left">
+    <origin xyz="-0.025 0.03 0.015" rpy="0 0 0" /> 
+    <origin xyz="0 0 0" rpy="-1.571 0 0"/>
+  </xacro:robot_diff_wheel>
+
+  <xacro:robot_diff_wheel side_wheel="right">
+    <origin xyz="-0.025 -0.03 0.015" rpy="0 0 0" />
+    <origin xyz="0 0 0" rpy="1.571 0 0"/>
+  </xacro:robot_diff_wheel>
+
+    <!--
+########################################################################################
+Sensor laser
+########################################################################################
+-->
+ <link name="sensor_laser">
+  <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="0.02" />
+      <!-- RANDOM INERTIA BELOW -->
+    <xacro:cylinder_inertia mass="0.02" r="0.05" l="0.1" />
+    </inertial>
+
+  <visual>                                                                    
+    <origin xyz="0 0 0" rpy="0 0 0" />                                                   
+    <geometry>                                                                   
+      <mesh filename="package://robot_description/meshes/Sensor.dae" />     
+    </geometry>                                                                   
+  </visual>                                                                   
+  <collision>                                                                   
+    <origin xyz="0 0 0" rpy="0 0 0" />                                                    
+    <geometry>                                                                   
+      <mesh filename="package://robot_description/meshes/Sensor.dae" />     
+    </geometry>                                                                   
+  </collision>        
+  </link>
+
+  <joint name="joint_sensor_laser" type="fixed">
+    <origin xyz="0.04 0 0.03" rpy="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="sensor_laser"/>
+  </joint>
+
+  
+    <!--
+########################################################################################
+Caster wheel
+########################################################################################
+-->
+  <link name="wheel">                                                                                                                                         
+    <visual>                                                                    
+      <origin xyz="0 0 0" rpy="0 0 0" />                                                   
+      <geometry>                                                                   
+	      <mesh filename="package://robot_description/meshes/Caster.dae" />     
+      </geometry>                                                                   
+    </visual>                                                                   
+    <collision>                                                                   
+      <origin xyz="0 0 0" rpy="0 0 0" />                                                    
+      <geometry>                                                                   
+	      <mesh filename="package://robot_description/meshes/Caster.dae" />     
+      </geometry>                                                                   
+    </collision>                                                                    
+    <inertial>                                                                    
+      <origin xyz="0 0 0" rpy="0 0 0"/>                                                                   
+      <mass value="0.021"/>                                                                   
+      <inertia ixx="4.183e-8"  ixy="0.000e+0"  ixz="0.000e+0" iyy="4.183e-8" iyz="0.000e+0" izz="4.183e-8" />                                                                   
+    </inertial>                                                                   
+  </link>                                                                   
+
+  <joint name="caster_wheel_to_wheel" type="continuous">
+    <parent link="chassis"/>
+    <child link="wheel"/>
+    <origin xyz="0.035 0.0 -0.003" rpy="0 0 0" />
+    <axis xyz="0 1 0" />
+  </joint>
+
+  <transmission name="trans_wheel" >
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="caster_wheel_to_wheel">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="act_wheel">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  
+  <!--
+########################################################################################
+Modelagem da roda esquerda "link" "joint" 
+########################################################################################
+-->
+  <!-- <link name="left_wheel">
+    <visual>
+      <origin rpy="-1.571 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://robot_diff_description/meshes/Wheel.dae"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="-1.571 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://robot_diff_description/meshes/Wheel.dae"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="-1.571 0 0" xyz="0 0 0"/>
+      <mass value="0.021"/>
+      <inertia ixx="4.190e-6" ixy="0.00e+0" ixz="0.00e+0" iyy="4.193e-6" iyz="0.00e+0" izz="7.703e-6"/>
+    </inertial>
+  </link>
+  <joint name="base_to_left_wheel" type="continuous">
+    <parent link="chassis"/>
+    <child link="left_wheel"/>
+    <origin rpy="0 0 0" xyz="0 0.058 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+  
+  <transmission name="transmission_left_wheel">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="base_to_left_wheel">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="left_wheel_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+	</transmission> -->
+  <!--
+########################################################################################
+Modelagem da roda direita "link" "joint"
+########################################################################################
+-->
+  <!-- <link name="right_wheel">
+    <visual>
+      <origin rpy="1.571 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://robot_diff_description/meshes/Wheel.dae"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="1.571 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://robot_diff_description/meshes/Wheel.dae"/>
+      </geometry>
+    </collision>
+    <inertial>
+    <origin rpy="1.571 0 0" xyz="0 0 0"/>
+    <mass value="0.021"/>
+    <inertia ixx="4.190e-6" ixy="0.00e+0" ixz="0.00e+0" iyy="4.193e-6" iyz="0.00e+0" izz="7.703e-6"/>
+    </inertial>
+  </link>
+  <joint name="base_to_right_wheel" type="continuous">
+    <parent link="chassis"/>
+    <child link="right_wheel"/>
+    <origin rpy="0 0 0" xyz="0 -0.058 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <transmission name="transmission_right_wheel">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="base_to_right_wheel">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="right_wheel_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+	</transmission> -->
+  
+  <!--
+########################################################################################
+Plugin Gazebo - Controller
+########################################################################################
+-->
+
+  <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_diff_drive.so">
+      <robotNamespace>/</robotNamespace>
+      <legacyModeNS>true</legacyModeNS>
+      <alwaysOn>true</alwaysOn>
+      <legacyMode>false</legacyMode>
+      <updateRate>40</updateRate>
+      <leftJoint>base_to_left_wheel</leftJoint>
+      <rightJoint>base_to_right_wheel</rightJoint>
+      <!-- <wheelSeparation>0.4</wheelSeparation>
+      <wheelDiameter>0.2</wheelDiameter> -->
+      <torque>20</torque>
+      <commandTopic>cmd_vel</commandTopic>
+      <odometryTopic>odom</odometryTopic>
+      <odometryFrame>odom</odometryFrame>
+      <publishWheelTF>true</publishWheelTF>
+      <publishOdomTF>true</publishOdomTF>
+      <publishWheelJointState>true</publishWheelJointState>
+      <robotBaseFrame>base_link</robotBaseFrame>
+    </plugin>
+  </gazebo>
+
+  <gazebo reference="sensor_laser">
+    <sensor type="ray" name="head_hokuyo_sensor">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>false</visualize>
+      <update_rate>20</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>720</samples>
+            <resolution>1</resolution>
+            <min_angle>-1.570796</min_angle>
+            <max_angle>1.570796</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.10</min>
+          <max>10.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+      <plugin name="gazebo_ros_head_hokuyo_controller" filename="libgazebo_ros_laser.so">
+        <topicName>/m2wr/laser/scan</topicName>
+        <frameName>sensor_laser</frameName>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+</robot>
